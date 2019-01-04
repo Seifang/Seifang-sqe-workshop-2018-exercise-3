@@ -550,29 +550,12 @@ function substituteUnaryExpression(stringCode,environmentFunc,depth){
     return stringCode;
 }
 
-function substituteUpdateExpression(stringCode,environmentFunc){
-    evalUpdate(stringCode,environmentFunc);
-    return stringCode;
-}
-
-function evalUpdate(stringCode,environmentFunc){
+function substituteUpdateExpression(stringCode,environmentFunc,depth){
     let argName = stringCode.argument.name;
-    let i;
-    let currIndex;
-    for(i = 0;i < environmentFunc.length;i++){
-        let element = environmentFunc[i];
-        if(element['var'] === argName){
-            currIndex = i;
-        }
-    }
-    switch(stringCode.operator){
-    case '++' :
-        environmentFunc[currIndex].val.expression.value = environmentFunc[currIndex].val.expression.value + 1;
-        return environmentFunc[currIndex]['val'];
-    case '--' :
-        environmentFunc[currIndex].val.expression.value = environmentFunc[currIndex].val.expression.value - 1;
-        return environmentFunc[currIndex]['val'];
-    }
+    let operator = stringCode.operator[0];
+    stringCode = esprima.parseScript(argName + '=' + argName + operator + '1', {loc: true}).body[0];
+    stringCode.expression = parseJsonCode(stringCode.expression,environmentFunc,depth);
+    return stringCode;
 }
 
 function substituteIdentifier(stringCode,environmentFunc){
